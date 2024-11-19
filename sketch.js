@@ -90,9 +90,8 @@ let dataset; // Para armazenar o dataset carregado
 }*/
 
 
-
 let dataset; // Para armazenar o dataset carregado
-let continentData = {}; // Dados agregados por continente e países
+let continentData = {}; // Dados agregados por continente e tributários
 let maxDischarge; // Para normalizar os valores no gráfico
 let padding = 20; // Espaçamento entre colunas
 let barWidth = 100; // Largura de cada coluna (continente)
@@ -125,24 +124,16 @@ function processData() {
   // Inicializar os dados agregados por continente
   dataset.rows.forEach(row => {
     let continent = row.get("continent");
-    let country = row.get("countries");
     let discharge = parseFloat(row.get("discharge"));
 
     if (!continentData[continent]) {
       continentData[continent] = {
-        totalDischarge: 0,
-        countries: {}
+        totalDischarge: 0
       };
     }
 
     // Somar o discharge total do continente
     continentData[continent].totalDischarge += discharge;
-
-    // Adicionar ou atualizar o discharge do país no continente
-    if (!continentData[continent].countries[country]) {
-      continentData[continent].countries[country] = 0;
-    }
-    continentData[continent].countries[country] += discharge;
   });
 }
 
@@ -152,31 +143,23 @@ function drawBarChart() {
   textAlign(CENTER);
   textSize(14);
 
-  // Para cada continente, desenhar a coluna e os países dentro dela
+  // Para cada continente, desenhar a coluna com a soma total de discharge
   for (const [continent, data] of Object.entries(continentData)) {
-    let yPos = height - 50; // Base da coluna
     let totalDischarge = data.totalDischarge;
 
-    // Desenhar os países dentro da coluna
-    for (const [country, discharge] of Object.entries(data.countries)) {
-      // Altura da seção do país normalizada
-      let barHeight = map(discharge, 0, maxDischarge, 0, height - 100);
+    // Altura da barra normalizada
+    let barHeight = map(totalDischarge, 0, maxDischarge, 0, height - 100);
 
-      // Desenhar a seção do país
-      fill(random(100, 255), random(100, 255), random(100, 255));
-      rect(xPos, yPos - barHeight, barWidth, barHeight);
+    // Desenhar a barra
+    fill(random(100, 255), random(100, 255), random(100, 255));
+    rect(xPos, height - 50 - barHeight, barWidth, barHeight);
 
-      // Atualizar a posição vertical para o próximo país
-      yPos -= barHeight;
-
-      // Exibir o nome do país dentro da seção
-      fill(0);
-      textSize(10);
-      text(country, xPos + barWidth / 2, yPos + barHeight / 2);
-    }
+    // Exibir o valor total de discharge no topo da barra
+    fill(0);
+    textSize(12);
+    text(totalDischarge.toFixed(2), xPos + barWidth / 2, height - 55 - barHeight);
 
     // Desenhar o nome do continente abaixo da coluna
-    fill(0);
     textSize(14);
     text(continent, xPos + barWidth / 2, height - 20);
 
