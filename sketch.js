@@ -90,11 +90,14 @@ let dataset; // Para armazenar o dataset carregado
 }*/
 
 
+
 let dataset; // Para armazenar o dataset carregado
-let continentData = {}; // Dados agregados por continente e tributários
-let maxDischarge; // Para normalizar os valores no gráfico
-let padding = 20; // Espaçamento entre colunas
-let barWidth = 100; // Largura de cada coluna (continente)
+let continentData = {}; // Dados agregados por continente
+let maxDischarge, maxLength, maxArea; // Para normalizar os valores no gráfico
+let padding = 40; // Espaçamento entre grupos de colunas
+let barWidth = 30; // Largura de cada barra individual
+let barSpacing = 10; // Espaçamento entre as barras dentro de um grupo
+let groupWidth; // Largura de um grupo de barras (discharge, length, area)
 
 function preload() {
   // Carregar o dataset do CSV
@@ -105,13 +108,18 @@ function setup() {
   // Criar o canvas com largura igual à largura da janela
   createCanvas(windowWidth, windowHeight);
 
-  background(240);
+  background(50); // Fundo cinza escuro
 
   // Processar os dados do dataset
   processData();
 
-  // Encontrar o valor máximo de discharge para normalização
+  // Encontrar os valores máximos para normalização
   maxDischarge = max(Object.values(continentData).map(d => d.totalDischarge));
+  maxLength = max(Object.values(continentData).map(d => d.totalLength));
+  maxArea = max(Object.values(continentData).map(d => d.totalArea));
+
+  // Largura de cada grupo de barras (discharge, length, area)
+  groupWidth = 3 * barWidth + 2 * barSpacing;
 
   // Exibir os dados processados no console (opcional)
   console.log(continentData);
@@ -125,52 +133,125 @@ function processData() {
   dataset.rows.forEach(row => {
     let continent = row.get("continent");
     let discharge = parseFloat(row.get("discharge"));
+    let length = parseFloat(row.get("length"));
+    let area = parseFloat(row.get("area"));
 
     if (!continentData[continent]) {
       continentData[continent] = {
-        totalDischarge: 0
+        totalDischarge: 0,
+        totalLength: 0,
+        totalArea: 0
       };
     }
 
-    // Somar o discharge total do continente
+    // Somar os valores para cada métrica
     continentData[continent].totalDischarge += discharge;
+    continentData[continent].totalLength += length;
+    continentData[continent].totalArea += area;
   });
 }
 
 function drawBarChart() {
-  let xPos = padding; // Posição inicial da primeira coluna (continente)
+  // Calcular a largura total ocupada pelas barras e os espaçamentos
+  let totalWidth = Object.keys(continentData).length * (groupWidth + padding);
+
+  // Calcular o deslocamento inicial para centralizar
+  let xPos = (width - totalWidth) / 2;
 
   textAlign(CENTER);
   textSize(14);
+  stroke(255); // Definir a cor da borda para branco
+  strokeWeight(1); // Espessura da borda do texto
 
-  // Para cada continente, desenhar a coluna com a soma total de discharge
+  // Para cada continente, desenhar as barras para cada métrica
   for (const [continent, data] of Object.entries(continentData)) {
-    let totalDischarge = data.totalDischarge;
+    // Alturas normalizadas das barras
+    let barHeightDischarge = map(data.totalDischarge, 0, maxDischarge, 0, height - 150);
+    let barHeightLength = map(data.totalLength, 0, maxLength, 0, height - 150);
+    let barHeightArea = map(data.totalArea, 0, maxArea, 0, height - 150);
 
-    // Altura da barra normalizada
-    let barHeight = map(totalDischarge, 0, maxDischarge, 0, height - 100);
-
-    // Desenhar a barra
-    fill(random(100, 255), random(100, 255), random(100, 255));
-    rect(xPos, height - 50 - barHeight, barWidth, barHeight);
-
-    // Exibir o valor total de discharge no topo da barra
+    // Cor para a barra de discharge (do mais claro para o mais escuro)
+    let colorDischargeLight = color(100, 200, 255); // cor clara
+    let colorDischargeDark = color(0, 100, 255);   // cor escura
+    // Desenhar a barra de discharge com gradiente
+    drawGradientBar(xPos, height - 50 - barHeightDischarge, barWidth, barHeightDischarge, colorDischargeLight, colorDischargeDark);
     fill(0);
-    textSize(12);
-    text(totalDischarge.toFixed(2), xPos + barWidth / 2, height - 55 - barHeight);
+    push(); // Iniciar o bloco para transformar o texto
+    translate(xPos + barWidth / 2, height - 55 - barHeightDischarge); // Posição do texto
+    rotate(HALF_PI); // Rotacionar o texto 90 graus (vertical)
+    text(data.totalDischarge.toFixed(2), 0, 0); // Texto na vertical
+    pop(); // Restaurar o estado original
 
-    // Desenhar o nome do continente abaixo da coluna
+    // Cor para a barra de length (do mais claro para o mais escuro)
+    let colorLengthLight = color(150, 255, 100); // cor clara
+    let colorLengthDark = color(50, 200, 50);    // cor escura
+    // Desenhar a barra de length com gradiente
+    drawGradientBar(xPos + barWidth + barSpacing, height - 50 - barHeightLength, barWidth, barHeightLength, colorLengthLight, colorLengthDark);
+    fill(0);
+    push(); // Iniciar o bloco para transformar o texto
+    translate(xPos + barWidth + barSpacing + barWidth / 2, height - 55 - barHeightLength); // Posição do texto
+    rotate(HALF_PI); // Rotacionar o texto 90 graus (vertical)
+    text(data.totalLength.toFixed(2), 0, 0); // Texto na vertical
+    pop(); // Restaurar o estado original
+
+    // Cor para a barra de area (do mais claro para o mais escuro)
+    let colorAreaLight = color(255, 200, 100); // cor clara
+    let colorAreaDark = color(255, 100, 0);    // cor escura
+    // Desenhar a barra de area com gradiente
+    drawGradientBar(xPos + 2 * (barWidth + barSpacing), height - 50 - barHeightArea, barWidth, barHeightArea, colorAreaLight, colorAreaDark);
+    fill(0);
+    push(); // Iniciar o bloco para transformar o texto
+    translate(xPos + 2 * (barWidth + barSpacing) + barWidth / 2, height - 55 - barHeightArea); // Posição do texto
+    rotate(HALF_PI); // Rotacionar o texto 90 graus (vertical)
+    text(data.totalArea.toFixed(2), 0, 0); // Texto na vertical
+    pop(); // Restaurar o estado original
+
+    // Desenhar o nome do continente abaixo do grupo de barras
     textSize(14);
-    text(continent, xPos + barWidth / 2, height - 20);
+    text(continent, xPos + groupWidth / 2, height - 20);
 
     // Atualizar a posição horizontal para o próximo continente
-    xPos += barWidth + padding;
+    xPos += groupWidth + padding;
+  }
+
+  // Desenhar a legenda
+  drawLegend();
+}
+
+function drawLegend() {
+  textSize(12);
+  textAlign(LEFT);
+
+  // Legenda das cores
+  fill(100, 200, 255);
+  rect(20, 20, 20, 20);
+  fill(0);
+  text("Discharge", 50, 35);
+
+  fill(150, 255, 100);
+  rect(20, 50, 20, 20);
+  fill(0);
+  text("Length", 50, 65);
+
+  fill(255, 200, 100);
+  rect(20, 80, 20, 20);
+  fill(0);
+  text("Area", 50, 95);
+}
+
+function drawGradientBar(x, y, w, h, c1, c2) {
+  // Função para desenhar uma barra com gradiente vertical
+  for (let i = 0; i < h; i++) {
+    let inter = map(i, 0, h, 0, 1); // Interpolar de 0 a 1 ao longo da altura da barra
+    let c = lerpColor(c1, c2, inter); // Interpolação da cor
+    stroke(c);
+    line(x, y + i, x + w, y + i); // Desenha a linha (parte da barra)
   }
 }
 
 function windowResized() {
   // Recalcular o tamanho do canvas quando a janela for redimensionada
   resizeCanvas(windowWidth, windowHeight);
-  background(240);
+  background(50); // Redefinir o fundo cinza escuro
   drawBarChart();
 }
