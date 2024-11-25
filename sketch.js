@@ -103,12 +103,13 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   processData();
-
   maxDischarge = max(Object.values(continentData).map(d => d.totalDischarge));
   maxLength = max(Object.values(continentData).map(d => d.totalLength));
   maxArea = max(Object.values(continentData).map(d => d.totalArea));
 
   drawBarChart();
+  text("Quantità di acqua scaricata nell'oceano da ciascun continente rispetto alle dimensioni dei fiumi", 200, 50);
+  fill('white')
 }
 
 function processData() {
@@ -156,6 +157,7 @@ function drawBarChart() {
     push();
     translate(xPos + barWidth / 2, height - barHeightDischarge - 100);
     rotate(HALF_PI); // Rotacionar o texto 90 graus (vertical)
+    fill ('white')
     text(data.totalDischarge.toFixed(2), 0, 0);
     pop();
 
@@ -166,6 +168,7 @@ function drawBarChart() {
     push();
     translate(xPos + barWidth + barSpacing + barWidth / 2, height - barHeightLength - 100);
     rotate(HALF_PI); // Rotacionar o texto 90 graus (vertical)
+    fill ('white')
     text(data.totalLength.toFixed(2), 0, 0);
     pop();
 
@@ -176,6 +179,7 @@ function drawBarChart() {
     push();
     translate(xPos + 2 * (barWidth + barSpacing) + barWidth / 2, height - barHeightArea - 110);
     rotate(HALF_PI); // Rotacionar o texto 90 graus (vertical)
+    fill ('white')
     text(data.totalArea.toFixed(2), 0, 0);
     pop();
 
@@ -193,7 +197,7 @@ function drawBarChart() {
 function calculateDimensions() {
   let numContinents = Object.keys(continentData).length;
 
-  let availableWidth = width - 100; // Largura disponível
+  let availableWidth = width - 90; // Largura disponível
   let maxGroupWidth = availableWidth / numContinents;
 
   groupWidth = min(maxGroupWidth, 200); // Limitar o tamanho máximo de um grupo
