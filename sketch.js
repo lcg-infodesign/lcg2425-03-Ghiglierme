@@ -154,7 +154,7 @@ function drawBarChart() {
     let colorDischargeDark = color(0, 100, 255);   // cor escura
     drawGradientBar(xPos, height - barHeightDischarge - 60, barWidth, barHeightDischarge, colorDischargeLight, colorDischargeDark);
     push();
-    translate(xPos + barWidth / 2, height - barHeightDischarge - 70);
+    translate(xPos + barWidth / 2, height - barHeightDischarge - 100);
     rotate(HALF_PI); // Rotacionar o texto 90 graus (vertical)
     text(data.totalDischarge.toFixed(2), 0, 0);
     pop();
@@ -164,7 +164,7 @@ function drawBarChart() {
     let colorLengthDark = color(50, 200, 50);    // cor escura
     drawGradientBar(xPos + barWidth + barSpacing, height - barHeightLength - 60, barWidth, barHeightLength, colorLengthLight, colorLengthDark);
     push();
-    translate(xPos + barWidth + barSpacing + barWidth / 2, height - barHeightLength - 70);
+    translate(xPos + barWidth + barSpacing + barWidth / 2, height - barHeightLength - 100);
     rotate(HALF_PI); // Rotacionar o texto 90 graus (vertical)
     text(data.totalLength.toFixed(2), 0, 0);
     pop();
@@ -174,7 +174,7 @@ function drawBarChart() {
     let colorAreaDark = color(255, 100, 0);    // cor escura
     drawGradientBar(xPos + 2 * (barWidth + barSpacing), height - barHeightArea - 60, barWidth, barHeightArea, colorAreaLight, colorAreaDark);
     push();
-    translate(xPos + 2 * (barWidth + barSpacing) + barWidth / 2, height - barHeightArea - 70);
+    translate(xPos + 2 * (barWidth + barSpacing) + barWidth / 2, height - barHeightArea - 110);
     rotate(HALF_PI); // Rotacionar o texto 90 graus (vertical)
     text(data.totalArea.toFixed(2), 0, 0);
     pop();
@@ -182,7 +182,7 @@ function drawBarChart() {
     // Nome do continente
     textSize(constrain(width / 60, 10, 14));
     fill(255);
-    text(continent, xPos + groupWidth / 2, height - 20);
+    text(continent, xPos + groupWidth / 2, height - 30);
 
     xPos += groupWidth + padding;
   }
@@ -193,7 +193,7 @@ function drawBarChart() {
 function calculateDimensions() {
   let numContinents = Object.keys(continentData).length;
 
-  let availableWidth = width - 40; // Largura disponível
+  let availableWidth = width - 100; // Largura disponível
   let maxGroupWidth = availableWidth / numContinents;
 
   groupWidth = min(maxGroupWidth, 200); // Limitar o tamanho máximo de um grupo
